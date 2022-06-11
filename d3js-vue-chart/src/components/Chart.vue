@@ -4,6 +4,9 @@
             <g id="xaxis" />
             <g id="yaxis" />
             <g id="marks" />
+            <clipPath id="clip">
+                <rect id="clipRect"/>
+            </clipPath>
         </svg>
     </div>
 </template>
@@ -36,11 +39,11 @@ function updateChart() {
         return;
     const stocks = props.stocks || [];
 
-    console.log(`Rendering chart ${width.value} / ${height.value} - ${stocks.length} stocks`)
+    //console.log(`Rendering chart ${width.value} / ${height.value} - ${stocks.length} stocks`)
 
     const xScale = d3.scaleLinear().domain([0, 10]).range([0, innerWidth.value]);
     const yScale = d3.scaleLinear().domain([0, 10]).range([innerHeight.value, 0]);
-    const rScale = d3.scaleLinear().domain([d3.min(stocks, d => d.size) || 0, d3.max(stocks, d => d.size) || 0]).range([0, 20]);
+    const rScale = d3.scaleLinear().domain([d3.min(stocks, d => d.size) || 0, d3.max(stocks, d => d.size) || 0]).range([0, innerWidth.value / 50]);
     const colorScale = d3.scaleLinear().domain(rScale.domain()).range(["red", "green"] as any);
 
 
@@ -53,6 +56,15 @@ function updateChart() {
             .attr("transform", `translate(${margin.left}, ${margin.top})`)
             .call(d3.axisLeft(yScale));
 
+    const setupCircle = (circle: d3.Selection<SVGGElement, StockItem, d3.BaseType, undefined>) =>
+        circle
+            .attr("cx", (d) => xScale(d.alphaX))
+            .attr("cy", (d) => yScale(d.alphaY))
+            .attr("r", (d) => rScale(d.size))
+            .attr("fill", d => colorScale(d.size))
+            .attr("clip-path", "url(#clip)");
+
+    const t = d3.transition().duration(1000/60).ease(d3.easeLinear);
     const svg = d3
         .select(svgChart.value!)
         .attr("width", width.value)
@@ -60,15 +72,22 @@ function updateChart() {
     svg.select("g#xaxis").call(xAxis as any)
     svg.select("g#yaxis").call(yAxis as any)
 
+    const clipPath = svg.select("#clipRect")
+        .attr("x", 0)
+        .attr("width", innerWidth.value)
+        .attr("y", 0)
+        .attr("height", innerHeight.value)
+
     const markPane = svg.select("g#marks").attr("transform", `translate(${margin.left}, ${margin.top})`)
     markPane
         .selectAll("circle")
         .data(stocks)
         .join("circle")
-        .attr("cx", (d) => xScale(d.alphaX))
-        .attr("cy", (d) => yScale(d.alphaY))
-        .attr("r", (d) => rScale(d.size))
-        .attr("fill", d=>colorScale(d.size))
+        .transition(t as any)
+        .call(setupCircle as any)
+        // .join(
+        //      enter => enter.append("cirle").call(setupCircle as any),
+        //      update => update.transition().call(setupCircle as any))
     //console.log(data);
 }
 
@@ -80,6 +99,6 @@ function updateChart() {
 .chart-container {
     display: grid;
     place-items: center;
-    min-width: 100%;
+    width: 100%;
 }
 </style>

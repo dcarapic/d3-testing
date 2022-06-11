@@ -2,6 +2,7 @@ export type StockItem = { code: string; date: Date; weekOffset: number; alphaX: 
 
 export const GenerateStocks = (stockCount: number, weeks: number, timestamp: Date): StockItem[] => {
     let result = new Array<StockItem>();
+    stockCount = StockNames.length < stockCount ? StockNames.length : stockCount;
     for (let w = 0; w < weeks; w++) {
         let dt = new Date(timestamp.valueOf());
         dt.setDate(dt.getDate() + w * -7);
@@ -14,8 +15,8 @@ export const GenerateStocks = (stockCount: number, weeks: number, timestamp: Dat
             } else {
                 //debugger;
                 const prevPoint = result[i + (w - 1) * stockCount];
-                x = prevPoint.alphaX + 0.1 * Math.sin(w / 3 + prevPoint.size / 500);
-                y = prevPoint.alphaY + 0.1 * Math.cos(w / 3 + prevPoint.size / 500);
+                x = prevPoint.alphaX + 0.1 * Math.sin(w / 3 + prevPoint.size / 150);
+                y = prevPoint.alphaY + 0.1 * Math.cos(w / 3 + prevPoint.size / 150);
                 size = prevPoint.size;
             }
             // x = x > 1 ? 1 : x < 0 ? 0 : x;
