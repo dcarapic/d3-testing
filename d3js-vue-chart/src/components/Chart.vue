@@ -5,8 +5,8 @@
         </div>
         <div v-if="fetchStocks.isFinished.value" class="setting">
             <label for="stocks">Stocks count</label><input type="number" v-model.lazy="stockNumber" min="10"
-                :max="stockWithPrices?.size"><span>(Total: {{
-                        stockWithPrices?.size
+                :max="stockWithPrices?.length"><span>(Total: {{
+                        stockWithPrices?.length
                 }})</span>
         </div>
         <div id="divChart" ref="divChart">
@@ -133,6 +133,8 @@ function updateChart() {
     min-width: 100%;
     max-width: 100%;
     min-height: 10;
+    display: grid;
+    place-items: center;
 }
 
 #svgChart {
